@@ -65,7 +65,8 @@ public class MavenIndex {
         // lookup wagon used to remotely fetch index
         this.httpWagon = plexusContainer.lookup(Wagon.class, "http");
         
-        File dataDir = new File("./data");//new File(System.getProperty("jboss.server.data.dir"));
+        File dataDir = new File(System.getProperty("com.googlecode.japi.checker.online.maven.MavenIndex.dataDir",
+        						System.getProperty("jboss.server.data.dir")));
 
         // Creators we want to use (search for fields it defines)
         List<IndexCreator> indexers = new ArrayList<IndexCreator>();

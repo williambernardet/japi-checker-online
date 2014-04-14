@@ -342,7 +342,7 @@
 				<artifactId>jboss-as-maven-plugin</artifactId>
 				<version>${version.jboss.as.maven.plugin}</version>
 				<configuration>
-					<jvmArgs>-Xms128m -Xmx1024m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000</jvmArgs>
+					<jvmArgs>-Xms128m -Xmx1024m -XX:MaxPermSize=256m -Djava.net.preferIPv4Stack=true -Dcom.googlecode.japi.checker.online.maven.MavenIndex.dataDir=./data -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000</jvmArgs>
 				</configuration>
 			</plugin>
 			<!-- Surefire plugin before 2.9 version is buggy -->
