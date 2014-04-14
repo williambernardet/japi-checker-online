@@ -1,68 +1,142 @@
+/**
+ * Set the console if not defined.
+ */
+try {
+	console.log
+} catch(e) {
+	if (e) {
+		console.log = function() {}
+	}
+};
+
+function doIndex() {
+	// restore default state...
+	$('#intro').show();
+	$('#diff').hide();
+	$('#search').hide();
+	$("#searchresult").replaceWith("<div id=\"searchresult\"></div>");	
+}
+
+function getClassNameForSeverity(severity) {
+	if (severity.toLowerCase() == "error") {
+		return "danger";
+	}
+	if (severity.toLowerCase() == "warning") {
+		return "warning";
+	}
+	return "info";
+}
+
+function setSearchBoxActive(active) {
+	if (active) {
+		$('#searchform').removeClass('form-search');
+		$('#searchform').addClass('form-search-active');
+	} else {
+		$('#searchform').removeClass('form-search-active');
+		$('#searchform').addClass('form-search');
+	}
+}
+
+function enableVersionLinks() {
+	$('.versionlink').on('click', function (e) {
+        e.preventDefault();
+        $('.versionlink').removeClass('active');
+        $(this).addClass('active loading');
+    	$.ajax({
+    		type : "GET",
+    		headers: { "Accept": "application/json" },
+    		url : $(this).attr('href'),
+    		success : function(data) {
+    			console.log(data);
+    			$('.versionlink.loading').removeClass('loading');
+    			$('#diffresult tr:gt(0)').remove();
+    			$.each(data, function(i, report) {
+    				var content = '<tr class=\"' + getClassNameForSeverity(report.severity) + '\">';
+    				content += '<td><img src="static/resources/img/' + report.severity.toLowerCase() + '.png" width=\"32\" heigh=\"32\"/></td>';
+    				content += '<td>' + (report.source==null?'':report.source) + '</td>';
+    				content += '<td>' + report.message + '</td>';
+    	            content += '</tr>';
+    	            $('#diffresult tr:last').after(content);
+    	          });			
+    		},
+    		error : function(e) {
+    			$('.versionlink.loading').removeClass('loading');
+    			console.log('Error: ' + e);
+    		}
+    	});    	
+    });
+}
+
+var currentSearch = null;
 function doSearch() {
 	var search = $('#searchbox').val();
-	var exactmatch = $('#exactmatch').prop("checked");
+	var exactmatch = false; //$('#exactmatch').prop("checked");
+
+	// restore default state...
+	$('#search').show();
+	$('#diff').hide();
+	$('#intro').hide();
+	$("#searchresult").replaceWith("<div id=\"searchresult\"></div>");
 	
-	$.ajax({
+	setSearchBoxActive(true);
+	currentSearch = $.ajax({
 		type : "GET",
 		url : "search",
 		data : {"query": search, "exactmatch": exactmatch.toString()},
+		beforeSend : function()    {           
+            if(currentSearch != null) {
+            	currentSearch.abort();
+            }
+			setSearchBoxActive(true);
+        },
 		success : function(data) {
-			$("#searchprogress").hide();
+			setSearchBoxActive(false);
 			$("#searchresult").replaceWith("<div id=\"searchresult\"></div>");
+            var content = '<table class=\"table\">';
+            content += '<thead>';
+            content += '<tr>';
+            content += '<th>GroupId</th>';
+            content += '<th>ArtifactId</th>';
+            content += '<th>Packaging</th>';
+            content += '<th>Version</th>';
+            content += '</tr>';
+            content += '</thead>';
+            content += '<tbody>';
 			$.each(data, function(i, group) {
-	            var content = '<li>' + i;
-	            content += '<ul>';
 				$.each(group.artifactInfos, function(i, artifactInfos) {
-					content += '<li><a href="diff/' + artifactInfos.groupId +
+		            content += '<tr>';
+		            if (i == 0) {
+			            content += '<td rowspan=\"' + group.artifactInfos.length + '\">' + artifactInfos.groupId + '</td>';
+		            }
+		            content += '<td>' + artifactInfos.artifactId + '</td>';
+		            content += '<td>' + artifactInfos.fextension + '</td>';
+					content += '<td><a href="diff/' + artifactInfos.groupId +
 						'/'+ artifactInfos.artifactId +
 						'/'+ artifactInfos.version +
-						'/'+ artifactInfos.fextension + '/">';
-					content += artifactInfos.artifactId;
-					if (artifactInfos.classifier != null) {
-						content += "-" +artifactInfos.classifier;
-					}
-					content += "-" + artifactInfos.version;
-					content += "." + artifactInfos.fextension;
-					content += '</a></li>';
+						'/'+ artifactInfos.fextension + '/" class=\"searchlink\">';
+					content += artifactInfos.version;
+					content += '</a></td>';
+		            content += '</tr>';
 				});
-	            content += '</ul>';
-	            content += '</li>';
-	            $(content).appendTo("#searchresult");
-	          });			
-		},
-		error : function(e) {
-			$("#searchprogress").hide();
-			alert('Error: ' + e);
-			$("#searchresult").replaceWith("<div id=\"searchresult\"></div>");
-		}
-	});
-}
 
-
-function updateDiff(imgroot, groupId, artifactId, version, extension, againstVersion) {
-	console.log("updateDiff: " + groupId + "/" + artifactId + "/" + version + "/" + extension + "/" + againstVersion);
-	$("#diffprogress").show();
-	$.ajax({
-		type : "GET",
-		headers: { "Accept": "application/json" },
-		url : againstVersion,
-		success : function(data) {
-			console.log(data);
-			$("#diffprogress").hide();
-			$('#result tr:gt(0)').remove();
-			$.each(data, function(i, report) {
-				var content = '<tr>';
-				content += '<td><img src="' + imgroot + '/' + report.severity.toLowerCase() + '.png" width=\"32\" heigh=\"32\"/></td>';
-				content += '<td>' + (report.source==null?'':report.source) + '</td>';
-				content += '<td>' + report.message + '</td>';
-	            content += '</tr>';
-	            $('#result tr:last').after(content);
 	          });			
-		},
+            content += '</tbody></table>';
+            $(content).appendTo("#searchresult");
+            
+            $('.searchlink').on('click', function (e) {
+            	console.log("loading " + $(this).attr('href'));
+                e.preventDefault();
+            	$('#search').hide();
+            	$('#intro').hide();
+            	$('#diff').show();
+            	$("#diff").load($(this).attr('href'), function() {
+	    			enableVersionLinks();	            		
+            	});
+            });		},
 		error : function(e) {
-			$("#diffprogress").hide();
-			alert('Error: ' + e);
-			$(".row-start").replaceWith("<tr class=\"row-start\"></tr>");
+			setSearchBoxActive(false);
+			console.log('Error: ' + e);
+			//$("#searchresult").replaceWith("<div id=\"searchresult\"></div>");
 		}
 	});
 }

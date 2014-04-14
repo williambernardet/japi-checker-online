@@ -1,0 +1,74 @@
+.navbar-form .input-group input.search-query {
+    padding-left:26px;
+    -moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    -khtml-border-radius: 20px;
+    border-radius: 20px;
+}
+a.list-group-item.active.loading {
+	background-image: url(../img/loading.gif);
+    background-size: 18px 18px;
+    background-repeat:no-repeat;
+    background-position: right 8px top 12px;
+}
+form.form-search {
+    position: relative;
+    margin-bottom: 0px;
+}
+form.form-search:before {
+    display: block;
+    width: 14px;
+    height: 14px;
+    content: "\e003";
+    font-family: 'Glyphicons Halflings';
+    background-position: -48px 0;
+    position: absolute;
+    top:8px;
+    left:8px;
+    opacity: .5;
+    z-index: 1000;
+}
+form.form-search-active {
+    position: relative;
+}
+form.form-search-active:before {
+    display: block;
+    width: 16px;
+    height: 16px;
+    position: absolute;
+    top:8px;
+    left:6px;
+    opacity: .5;
+    z-index: 1000;
+    content: " ";
+    background-image: url(../img/loading.gif);
+    background-size: 18px 18px;
+    background-repeat:no-repeat;
+    background-position: 0px 0;
+}
+
+#search div {
+  padding-top: 5px;	
+}
+
+#diff div {
+  padding-top: 5px;	
+}
+
+html, body {
+	height: 100%;
+	/* The html and body elements cannot have any padding or margin. */
+}
+#wrap {
+	min-height: 100%;
+    height: auto !important;
+	height: 100%;
+	/* Negative indent footer by it's height */
+	margin: 0 auto -60px;
+}
+#wrap > .container {
+	padding-top: 60px;
+}      
+#push, #footer {
+	height: 60px;
+}
