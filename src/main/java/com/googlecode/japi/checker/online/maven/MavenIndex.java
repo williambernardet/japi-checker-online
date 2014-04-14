@@ -15,6 +15,7 @@ import org.codehaus.plexus.DefaultPlexusContainer;
 import org.codehaus.plexus.PlexusContainer;
 import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.apache.commons.io.IOUtils;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.BooleanClause.Occur;
@@ -153,9 +154,15 @@ public class MavenIndex {
         List<ArtifactInfo> result = new ArrayList<ArtifactInfo>();
         if (ready) {
             final IteratorSearchRequest request = new IteratorSearchRequest(query, Collections.singletonList(this.centralContext));
-            final IteratorSearchResponse response = indexer.searchIterator(request);
-            for ( ArtifactInfo ai : response ) {
-                result.add(new ArtifactInfoWrapper(ai));
+            
+            IteratorSearchResponse response = null;
+            try {
+            	response = indexer.searchIterator(request);
+            	for ( ArtifactInfo ai : response ) {
+            		result.add(new ArtifactInfoWrapper(ai));
+            	}
+            } finally {
+            	IOUtils.closeQuietly(response);
             }
         }
         return result;
@@ -182,8 +189,13 @@ public class MavenIndex {
     public Map<String, ArtifactInfoGroup> searchGroupByArtifacts(String query, boolean exactMatch) throws IOException {
         if (ready) {
             Query q = Utils.toQuery(indexer, query, exactMatch);
-            final GroupedSearchResponse response = indexer.searchGrouped(new GroupedSearchRequest(q, new GAGrouping(), this.centralContext));
-            return response.getResults();
+            GroupedSearchResponse response = null;
+            try {
+            	response = indexer.searchGrouped(new GroupedSearchRequest(q, new GAGrouping(), this.centralContext));
+                return response.getResults();
+            } finally {
+            	IOUtils.closeQuietly(response);
+            }
         }
         return new HashMap<String, ArtifactInfoGroup>();
     }
