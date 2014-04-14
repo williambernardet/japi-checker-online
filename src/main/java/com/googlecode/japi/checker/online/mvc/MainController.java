@@ -12,7 +12,6 @@ import java.util.logging.Logger;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.maven.index.ArtifactInfo;
-import org.apache.maven.index.ArtifactInfoGroup;
 import org.apache.maven.index.Field;
 import org.apache.maven.index.MAVEN;
 import org.apache.maven.index.expr.SourcedSearchExpression;
@@ -32,8 +31,6 @@ import com.googlecode.japi.checker.online.model.WebReport;
 import com.googlecode.japi.checker.BCChecker;
 import com.googlecode.japi.checker.Reporter;
 import com.googlecode.japi.checker.Reporter.Report;
-
-import flexjson.JSONSerializer;
 
 @Controller
 @RequestMapping(value="/")
@@ -67,7 +64,6 @@ public class MainController
         LOGGER.info("query=" + query);
         LOGGER.info("exactMatch=" + exactMatch);
         try {
-            //JSONSerializer serializer = new JSONSerializer();
             return WebArtifactInfoGroup.toWebArtifactInfoGroup(mavenIndex.searchGroupByArtifacts(query, exactMatch));
         } catch (IOException e) {
             LOGGER.severe(e.getMessage());
