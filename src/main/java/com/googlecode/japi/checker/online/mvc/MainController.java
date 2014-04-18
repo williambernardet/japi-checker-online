@@ -3,6 +3,7 @@ package com.googlecode.japi.checker.online.mvc;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -27,9 +28,11 @@ import com.googlecode.japi.checker.online.maven.MavenCache;
 import com.googlecode.japi.checker.online.maven.MavenIndex;
 import com.googlecode.japi.checker.online.model.WebArtifactInfoGroup;
 import com.googlecode.japi.checker.online.model.WebReport;
+import com.googlecode.japi.checker.rules.AllRules;
 import com.googlecode.japi.checker.BCChecker;
 import com.googlecode.japi.checker.Reporter;
 import com.googlecode.japi.checker.Reporter.Report;
+import com.googlecode.japi.checker.Rule;
 
 @Controller
 @RequestMapping(value="/")
@@ -145,6 +148,7 @@ public class MainController
         	File referenceArtifact = mavenCache.retrieve(referenceInfo);
         	File againstArtifact = mavenCache.retrieve(againstInfo);
         	BCChecker checker = new BCChecker();
+        	checker.setRules(Collections.<Rule>singletonList(new AllRules()));
         	final List<WebReport> reports = new ArrayList<WebReport>();
         	checker.setReporter(new Reporter() {
 
